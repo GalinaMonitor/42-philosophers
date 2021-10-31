@@ -1,88 +1,85 @@
 # include "philosopher.h"
 
-enum states { hungry, eating, thinking, sleeping };
-int counter = 0;
 
-int	left(int n) { return (n - 1 + 5) % 5; }
-int	right(int n) { return (n + 1) % 5; }
-
-
-
-void	*philosopher(void *philo_raw)
+long int	get_usec()
 {
-	t_philo *philo = (t_philo *)philo_raw;
+	struct timeval current_time;
+	gettimeofday(&current_time, NULL);
+	return(current_time.tv_usec);
+}
 
+
+
+int	left(int n, int philo_num) { return (n - 1 + philo_num) % philo_num; }
+int	right(int n, int philo_num) { return (n + 1) % philo_num; }
+
+
+
+void	*philosopher(void *rules_raw)
+{
+	t_rules *rules = (t_rules *)rules_raw;
+	t_philo philo;
+	long int diff;
+	long int usec;
+
+	init_philo(&philo, rules);
+
+	printf("%d\n", philo.id);
+	philo.death_time_count = get_usec();
 	while (1)
 	{
-		usleep(500 * philo->id);
-		pthread_mutex_lock(philo->left_f);
-		printf("LFORK - %d\n", philo->id);
-		pthread_mutex_lock(philo->right_f);
-		printf("RFORK - %d\n", right(philo->id));
-		usleep(40);
-		pthread_mutex_unlock(philo->left_f);
-		printf("LFORKOFF - %d\n", philo->id);
-		pthread_mutex_unlock(philo->right_f);
-		printf("RFORKOFF - %d\n", philo->id);
-		usleep(40);
+		printf("%ld %d is thinking\n", get_usec(), philo.id);
+		pthread_mutex_lock(philo.left_f);
+		printf("%ld %d has taken a fork\n", get_usec(), philo.id);
+		pthread_mutex_lock(philo.right_f);
+		printf("%ld %d has taken a fork\n", get_usec(), philo.id);
+
+		diff = get_usec() - philo.death_time_count;
+		if (diff < 0)
+			diff = 1000000 + diff;
+		if (diff > rules->death_time * 1000)
+		{
+			printf("%ld %d died\n", get_usec(), philo.id);
+			return 0;
+		}
+
+		printf("%ld %d is eating\n", get_usec(), philo.id);
+		usleep(rules->eating_time * 1000);
+		philo.death_time_count = get_usec();
+		pthread_mutex_unlock(philo.left_f);
+		pthread_mutex_unlock(philo.right_f);
+		printf("%ld %d is sleeping\n", get_usec(), philo.id);
+		usleep(rules->sleeping_time * 1000);
 	}
 	return NULL;
 }
 
 
 
-int	main()
+int	main(int argc, char **argv)
 {
-	pthread_t		threads[5];
 	int				count;
-	t_philo			philo[5];
-	pthread_mutex_t	mutex[5];
+	pthread_t		threads[ft_atoi(argv[1])];
+	pthread_mutex_t	mutex[ft_atoi(argv[1])];
+	t_rules			rules;
 
-	int phi_state[5] = { thinking, thinking, thinking, thinking, thinking };
 	count = 0;
+	if (argc < 2)
+		return 0;
 
-	while (count < 5)
-		pthread_mutex_init(&(mutex[count++]), NULL);
-	count = 0;
+	init_rules(&rules, argv);
+	init_mutex(&rules, mutex);
+	rules.forks = mutex;
 
-	while (count < 4)
-	{
-		philo[count].forks = mutex;
-		philo[count].philosophers = philo;
+	pthread_mutex_lock(&rules.start);
+	init_pthread(&rules, threads);
+	pthread_mutex_unlock(&rules.start);
 
-		philo[count].id = count;
-
-		philo[count].left_f = &mutex[count];
-		philo[count].right_f = &mutex[right(count)];
-
-		philo[count].left_ph = left(count);
-		philo[count].right_ph = right(count);
-		count++;
-	}
-	philo[count].forks = mutex;
-	philo[count].philosophers = philo;
-
-	philo[count].id = count;
-
-	philo[count].right_f = &mutex[count];
-	philo[count].left_f = &mutex[right(count)];
-
-	philo[count].left_ph = left(count);
-	philo[count].right_ph = right(count);
-	count = 0;
-
-	while (count < 5)
-	{
-		pthread_create(&threads[count], NULL, philosopher, &philo[count]);
-		count++;
-	}
-	count = 0;
-
-	while (count < 5)
+	while (count < rules.philo_num)
 		pthread_join(threads[count++], NULL);
 	count = 0;
 
-	while (count < 5)
+	while (count < rules.philo_num)
 		pthread_mutex_destroy(&mutex[count++]);
 
 	return 0;
