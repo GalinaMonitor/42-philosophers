@@ -12,8 +12,8 @@ typedef struct		s_philo
 	int				left_ph;
 	int				right_ph;
 
-	pthread_mutex_t	*left_f;
-	pthread_mutex_t	*right_f;
+	pthread_mutex_t	*first_f;
+	pthread_mutex_t	*second_f;
 
 	long int 		death_time_count;
 }					t_philo;
@@ -23,20 +23,26 @@ typedef struct		s_rules
 	int				philo_id;
 
 	int				philo_num;
-	int				eating_time;
-	long int		death_time;
-	int				sleeping_time;
+	long long int	eating_time;
+	long long int	death_time;
+	long long int	sleeping_time;
+	time_t			starting_time;
 
 	pthread_mutex_t set_id;
 	pthread_mutex_t start;
 	pthread_mutex_t	*forks;
+	pthread_t		*threads;
 }					t_rules;
 
 
 void			init_philo(t_philo *philo, t_rules *rules);
 void			init_rules(t_rules *rules, char **argv);
-void			init_pthread(t_rules *rules, pthread_t *threads);
-void			init_mutex(t_rules *rules, pthread_mutex_t *mutex);
+void			init_pthread(t_rules *rules);
+void			init_mutex(t_rules *rules);
+
+void	destroy_mutex(t_rules *rules);
+
+void	destroy_pthread(t_rules *rules);
 
 long int		get_usec();
 
