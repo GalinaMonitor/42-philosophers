@@ -25,8 +25,6 @@ void	*philosopher(void *rules_raw)
 
 	while (1)
 	{
-		printf("%ld %d is thinking\n", get_usec(rules), philo.id);
-
 		pthread_mutex_lock(philo.first_f);
 		printf("%ld %d has taken a fork\n", get_usec(rules), philo.id);
 		pthread_mutex_lock(philo.second_f);
@@ -40,14 +38,30 @@ void	*philosopher(void *rules_raw)
 		if (diff > rules->death_time)
 		{
 			printf("%ld %d died\n", get_usec(rules), philo.id);
+			pthread_mutex_unlock(philo.first_f);
+			pthread_mutex_unlock(philo.second_f);
+			rules->finish = 1;
 			return 0;
 		}
-
+		if (philo.nbr_meals >= 0)
+		{
+			if (philo.nbr_meals > 0)
+				philo.nbr_meals--;
+			else
+			{
+				pthread_mutex_unlock(philo.first_f);
+				pthread_mutex_unlock(philo.second_f);
+				return 0;
+			}
+		}
+		if (rules->finish == 1)
+			return 0;
 		pthread_mutex_unlock(philo.first_f);
 		pthread_mutex_unlock(philo.second_f);
 
 		printf("%ld %d is sleeping\n", get_usec(rules), philo.id);
 		usleep(rules->sleeping_time * 1000);
+		printf("%ld %d is thinking\n", get_usec(rules), philo.id);
 	}
 	return NULL;
 }
@@ -70,15 +84,12 @@ int	main(int argc, char **argv)
 	init_pthread(&rules);
 	pthread_mutex_unlock(&rules.start);
 
-	// destroy_pthread(&rules);
-	// destroy_mutex(&rules);
-
 	while (count < rules.philo_num)
 		pthread_join(rules.threads[count++], NULL);
 	count = 0;
 
-	// while (count < rules.philo_num)
-	// 	pthread_mutex_destroy(&rules.forks[count++]);
+	while (count < rules.philo_num)
+		pthread_mutex_destroy(&rules.forks[count++]);
 
 	return 0;
 }
