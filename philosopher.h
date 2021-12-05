@@ -31,10 +31,13 @@ typedef struct		s_rules
 	time_t			starting_time;
 	int				finish;
 
+	t_philo         *philos;
+
 	pthread_mutex_t set_id;
 	pthread_mutex_t start;
 	pthread_mutex_t	*forks;
 	pthread_t		*threads;
+	pthread_t		*monitor;
 }					t_rules;
 
 
@@ -53,3 +56,5 @@ int				left(int n, int philo_num);
 int				right(int n, int philo_num);
 
 void			*philosopher(void *rules_raw);
+
+void			*monitor_philo(void *rules_raw);
