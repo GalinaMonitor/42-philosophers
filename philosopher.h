@@ -11,7 +11,7 @@ typedef struct		s_philo
 	int				id;
 	int				left_ph;
 	int				right_ph;
-	int				nbr_meals;
+	int             meals_num;
 
 	pthread_mutex_t	*first_f;
 	pthread_mutex_t	*second_f;
@@ -24,14 +24,14 @@ typedef struct		s_rules
 	int				philo_id;
 
 	int				philo_num;
-	int				nbr_meals;
 	long long int	eating_time;
 	long long int	death_time;
 	long long int	sleeping_time;
 	time_t			starting_time;
 	int				finish;
+	int             meals_num;
 
-	t_philo         *philos;
+	t_philo         **philos;
 
 	pthread_mutex_t set_id;
 	pthread_mutex_t start;

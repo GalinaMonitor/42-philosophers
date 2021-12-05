@@ -39,14 +39,16 @@ void    *monitor_philo(void *rules_raw)
 	int count;
 	long long int diff;
 	count = 0;
+	pthread_mutex_lock(&rules->start);
+	pthread_mutex_unlock(&rules->start);
 	while (1)
 	{
 		while (count < rules->philo_num)
 		{
-			diff = get_usec(rules) - rules->philos[count].death_time_count;
+			diff = get_usec(rules) - rules->philos[count]->death_time_count;
 			if (diff > rules->death_time)
 			{
-				printf("%ld %d died\n", get_usec(rules), rules->philos[count].id);
+				printf("%ld %d died\n", get_usec(rules), rules->philos[count]->id);
 				rules->finish = 1;
 				return NULL;
 			}
@@ -64,37 +66,48 @@ void	*philosopher(void *rules_raw)
 	long long int usec;
 
 	init_philo(&philo, rules);
-	rules->philos[philo.id] = philo;
+	rules->philos[philo.id] = &philo;
+
+	pthread_mutex_lock(&rules->start);
+	pthread_mutex_unlock(&rules->start);
 
 	while (1)
 	{
 		pthread_mutex_lock(philo.first_f);
+		if (rules->finish == 1)
+			return 0;
 		printf("%ld %d has taken a fork\n", get_usec(rules), philo.id);
 		pthread_mutex_lock(philo.second_f);
+		if (rules->finish == 1)
+			return 0;
 		printf("%ld %d has taken a fork\n", get_usec(rules), philo.id);
 
+		if (rules->finish == 1)
+			return 0;
 		printf("%ld %d is eating\n", get_usec(rules), philo.id);
 		ft_usleep(rules->eating_time);
-
-		philo.death_time_count = get_usec(rules);
-		if (philo.nbr_meals >= 0)
+		if (philo.meals_num >= 0)
 		{
-			if (philo.nbr_meals > 0)
-				philo.nbr_meals--;
-			else
+			if (philo.meals_num == 0)
 			{
 				pthread_mutex_unlock(philo.first_f);
 				pthread_mutex_unlock(philo.second_f);
 				return 0;
 			}
+			else
+				philo.meals_num--;
 		}
-		if (rules->finish == 1)
-			return 0;
+
+		philo.death_time_count = get_usec(rules);
 		pthread_mutex_unlock(philo.first_f);
 		pthread_mutex_unlock(philo.second_f);
 
+		if (rules->finish == 1)
+			return 0;
 		printf("%ld %d is sleeping\n", get_usec(rules), philo.id);
 		ft_usleep(rules->sleeping_time);
+		if (rules->finish == 1)
+			return 0;
 		printf("%ld %d is thinking\n", get_usec(rules), philo.id);
 	}
 	return NULL;
@@ -106,24 +119,29 @@ int	main(int argc, char **argv)
 {
 	int				count;
 	t_rules			rules;
+	struct timeval	tv;
+	time_t			res;
+	gettimeofday(&tv, NULL);
 
 	count = 0;
 	if (argc < 2)
 		return 0;
-
 	init_rules(&rules, argv);
 	init_mutex(&rules);
 
 	pthread_mutex_lock(&rules.start);
 	init_pthread(&rules);
+	res = 1000 * (size_t)tv.tv_sec + (size_t)tv.tv_usec / 1000;
+
+	rules.starting_time = res;
 	pthread_mutex_unlock(&rules.start);
 
 	while (count < rules.philo_num)
 		pthread_join(rules.threads[count++], NULL);
 	count = 0;
 
-	while (count < rules.philo_num)
-		pthread_mutex_destroy(&rules.forks[count++]);
+	 while (count < rules.philo_num)
+	 	pthread_mutex_destroy(&rules.forks[count++]);
 
 	return 0;
 }

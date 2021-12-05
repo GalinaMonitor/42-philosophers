@@ -7,11 +7,12 @@ void	init_philo(t_philo *philo, t_rules *rules)
 	rules->philo_id++;
 	pthread_mutex_unlock(&rules->set_id);
 
-	if (philo->id % 2 == 0 && philo->id != rules->philo_num - 1)
+	philo->meals_num = rules->meals_num;
+
+	if (philo->id % 2 == 1)
 	{
 		philo->first_f = &(rules->forks[philo->id]);
 		philo->second_f = &(rules->forks[right(philo->id, rules->philo_num)]);
-		usleep(100);
 	}
 	else
 	{
@@ -20,7 +21,6 @@ void	init_philo(t_philo *philo, t_rules *rules)
 	}
 
 	philo->death_time_count = 0;
-	philo->nbr_meals = rules->nbr_meals;
 
 	philo->left_ph = left(philo->id, rules->philo_num);
 	philo->right_ph = right(philo->id, rules->philo_num);
@@ -31,20 +31,18 @@ void	init_rules(t_rules *rules, char **argv)
 	struct timeval	tv;
 	time_t			res;
 	gettimeofday(&tv, NULL);
-	res = 1000 * (size_t)tv.tv_sec + (size_t)tv.tv_usec / 1000;
 
 	rules->philo_num = ft_atoi(argv[1]);
 	rules->death_time = ft_atoi(argv[2]);
 	rules->eating_time = ft_atoi(argv[3]);
 	rules->sleeping_time = ft_atoi(argv[4]);
 	if (argv[5] != NULL)
-		rules->nbr_meals = ft_atoi(argv[5]);
+		rules->meals_num = ft_atoi(argv[5]);
 	else
-		rules->nbr_meals = -1;
-	rules->philos = malloc(sizeof(t_philo *) * rules->philo_num);
-	rules->starting_time = res;
+		rules->meals_num = -1;
 	rules->philo_id = 0;
 	rules->finish = 0;
+	rules->philos = malloc(sizeof(t_philo *) * rules->philo_num);
 }
 
 void	init_mutex(t_rules *rules)
@@ -75,7 +73,8 @@ void	init_pthread(t_rules *rules)
 		pthread_create(&threads[count], NULL, philosopher, rules);
 		count++;
 	}
-//	pthread_create(monitor, NULL, monitor_philo, rules);
-//	rules->monitor = monitor;
+	monitor = malloc(sizeof(pthread_mutex_t));
+	pthread_create(monitor, NULL, monitor_philo, rules);
+	rules->monitor = monitor;
 	rules->threads = threads;
 }
