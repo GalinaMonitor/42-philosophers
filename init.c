@@ -2,13 +2,9 @@
 
 void	init_philo(t_philo *philo, t_rules *rules)
 {
-	pthread_mutex_lock(&rules->set_id);
-	philo->id = rules->philo_id;
 	rules->philo_id++;
-	pthread_mutex_unlock(&rules->set_id);
-
+	philo->id = rules->philo_id;
 	philo->meals_num = rules->meals_num;
-
 	if (philo->id % 2 == 1)
 	{
 		philo->first_f = &(rules->forks[philo->id]);
@@ -19,15 +15,16 @@ void	init_philo(t_philo *philo, t_rules *rules)
 		philo->first_f = &rules->forks[right(philo->id, rules->philo_num)];
 		philo->second_f = &rules->forks[philo->id];
 	}
-
 	philo->death_time_count = 0;
-
+	philo->finish_meals = 0;
 	philo->left_ph = left(philo->id, rules->philo_num);
 	philo->right_ph = right(philo->id, rules->philo_num);
 }
 
-void	init_rules(t_rules *rules, char **argv)
+void	init_rules(t_rules *rules, char **argv, int argc)
 {
+	if (argc < 2)
+		return ;
 	struct timeval	tv;
 	time_t			res;
 	gettimeofday(&tv, NULL);
@@ -41,8 +38,8 @@ void	init_rules(t_rules *rules, char **argv)
 	else
 		rules->meals_num = -1;
 	rules->philo_id = 0;
-	rules->finish = 0;
-	rules->philos = malloc(sizeof(t_philo *) * rules->philo_num);
+	rules->finish_session = 0;
+	rules->philos = malloc(sizeof(t_philo) * rules->philo_num);
 }
 
 void	init_mutex(t_rules *rules)
@@ -56,6 +53,8 @@ void	init_mutex(t_rules *rules)
 		pthread_mutex_init(&(mutex[count++]), NULL);
 	pthread_mutex_init(&rules->set_id, NULL);
 	pthread_mutex_init(&rules->start, NULL);
+	pthread_mutex_init(&rules->lock_print, NULL);
+	pthread_mutex_lock(&rules->start);
 	rules->forks = mutex;
 }
 
@@ -66,7 +65,6 @@ void	init_pthread(t_rules *rules)
 	pthread_t	*monitor;
 
 	threads = malloc(sizeof(pthread_mutex_t) * rules->philo_num);
-
 	count = 0;
 	while (count < rules->philo_num)
 	{
@@ -77,4 +75,13 @@ void	init_pthread(t_rules *rules)
 	pthread_create(monitor, NULL, monitor_philo, rules);
 	rules->monitor = monitor;
 	rules->threads = threads;
+}
+
+void	init_philos(t_rules *rules)
+{
+	int count;
+
+	count = 0;
+	while (count < rules->philo_num)
+		init_philo(&rules->philos[count++], rules);
 }

@@ -6,17 +6,24 @@
 # include <sys/time.h>
 # include "libft/libft/libft.h"
 
+# define FORK 0
+# define EAT 1
+# define SLEEP 2
+# define THINK 3
+# define DEAD 4
+
 typedef struct		s_philo
 {
 	int				id;
 	int				left_ph;
 	int				right_ph;
-	int             meals_num;
+	int				meals_num;
 
 	pthread_mutex_t	*first_f;
 	pthread_mutex_t	*second_f;
 
-	long int 		death_time_count;
+	long int		death_time_count;
+	int				finish_meals;
 }					t_philo;
 
 typedef struct		s_rules
@@ -28,21 +35,22 @@ typedef struct		s_rules
 	long long int	death_time;
 	long long int	sleeping_time;
 	time_t			starting_time;
-	int				finish;
-	int             meals_num;
+	int				finish_session;
+	int				meals_num;
 
-	t_philo         **philos;
+	t_philo			*philos;
 
 	pthread_mutex_t set_id;
 	pthread_mutex_t start;
 	pthread_mutex_t	*forks;
+	pthread_mutex_t lock_print;
 	pthread_t		*threads;
 	pthread_t		*monitor;
 }					t_rules;
 
 
 void			init_philo(t_philo *philo, t_rules *rules);
-void			init_rules(t_rules *rules, char **argv);
+void			init_rules(t_rules *rules, char **argv, int argc);
 void			init_pthread(t_rules *rules);
 void			init_mutex(t_rules *rules);
 
@@ -50,7 +58,7 @@ void	destroy_mutex(t_rules *rules);
 
 void	destroy_pthread(t_rules *rules);
 
-long int		get_usec();
+time_t	get_usec(t_rules *rules);
 
 int				left(int n, int philo_num);
 int				right(int n, int philo_num);
@@ -58,3 +66,20 @@ int				right(int n, int philo_num);
 void			*philosopher(void *rules_raw);
 
 void			*monitor_philo(void *rules_raw);
+
+void	print_message(t_rules *rules, t_philo *philo, int message);
+void	sleeping(t_rules *rules, t_philo *philo);
+void	eating(t_rules *rules, t_philo *philo);
+void	thinking(t_rules *rules, t_philo *philo);
+
+void	ft_usleep(int ms);
+
+long	ft_time(void);
+
+void	ft_usleep(int ms);
+int	left(int n, int philo_num);
+int	right(int n, int philo_num);
+
+void	destroy_malloc(t_rules *rules);
+
+void	init_philos(t_rules *rules);

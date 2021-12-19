@@ -8,7 +8,7 @@ LIBFT = libft/libft/libft.a
 
 HEADER = ./philosopher.h
 
-PHILO_SRC = philosopher.c init.c destroy.c
+PHILO_SRC = philosopher.c init.c destroy.c actions.c service.c
 
 SOURCES_LIBFT = $(addprefix $(DIR_LIBFT), $(LIBFT))
 
