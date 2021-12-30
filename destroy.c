@@ -31,5 +31,5 @@ void	destroy_malloc(t_rules *rules)
 
 	count = 0;
 	while (count < rules->philo_num)
-		free(rules->threads[count++]);
+		free(&rules->threads[count++]);
 }

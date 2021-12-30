@@ -18,7 +18,7 @@ void	*monitor_philo(void *rules_raw)
 		{
 			if (rules->philos[count].finish_meals != 1)
 			{
-				diff = get_usec(rules) - rules->starting_time - rules->philos[count].death_time_count;
+				diff = get_usec(rules) - rules->philos[count].death_time_count;
 				if (diff > rules->death_time)
 				{
 					print_message(rules, &rules->philos[count], DEAD);
@@ -70,10 +70,10 @@ int	main(int argc, char **argv)
 	init_rules(&rules, argv, argc);
 	init_mutex(&rules);
 	init_philos(&rules);
-	pthread_mutex_unlock(&rules.start);
-	rules.starting_time = get_usec(&rules);
+	pthread_mutex_lock(&rules.start);
 	init_pthread(&rules);
+	pthread_mutex_unlock(&rules.start);
 	destroy_pthread(&rules);
-	// destroy_mutex(&rules);
+	destroy_mutex(&rules);
 	return 0;
 }

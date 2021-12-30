@@ -11,6 +11,8 @@ void	eating(t_rules *rules, t_philo *philo)
 	ft_usleep(rules->eating_time);
 	if (philo->meals_num >= 0)
 		philo->meals_num--;
+	if (philo->meals_num == 0)
+		philo->finish_meals = 1;
 	pthread_mutex_unlock(philo->first_f);
 	pthread_mutex_unlock(philo->second_f);
 }
