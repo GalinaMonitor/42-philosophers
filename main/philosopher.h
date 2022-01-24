@@ -4,7 +4,7 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <sys/time.h>
-# include "libft/libft/libft.h"
+# include "../libft/libft/libft.h"
 
 # define FORK 0
 # define EAT 1
@@ -22,7 +22,7 @@ typedef struct		s_philo
 	pthread_mutex_t	*first_f;
 	pthread_mutex_t	*second_f;
 
-	long int		death_time_count;
+	long long int	death_time_count;
 	int				finish_meals;
 }					t_philo;
 

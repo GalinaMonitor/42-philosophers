@@ -3,8 +3,8 @@ CC = gcc
 
 FLAGS =
 
-DIR_LIBFT = libft/libft/
-LIBFT = libft/libft/libft.a
+DIR_LIBFT = ../libft/libft/
+LIBFT = ../libft/libft/libft.a
 
 HEADER = ./philosopher.h
 

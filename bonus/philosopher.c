@@ -1,11 +1,25 @@
 # include "philosopher.h"
 
+
+static void	ft_kill_philosophers(t_rules *rules)
+{
+	int	i;
+
+	i = 0;
+	while (i < rules->philo_num)
+	{
+		kill(rules->pid_philos[i], SIGKILL);
+		i++;
+	}
+}
+
+
 void	*monitor_philo(void *rules_raw)
 {
 	t_rules *rules;
 	int count;
 	int finished_philos;
-	long long int diff;
+	long int diff;
 
 	rules = (t_rules *)rules_raw;
 	count = 0;
@@ -21,6 +35,7 @@ void	*monitor_philo(void *rules_raw)
 				{
 					print_message(rules, &rules->philos[count], DEAD);
 					rules->finish_session = 1;
+					ft_kill_philosophers(rules);
 					return NULL;
 				}
 			}
@@ -57,5 +72,7 @@ int	main(int argc, char **argv)
 	init_rules(&rules, argv, argc);
 	init_sem(&rules);
 	init_philos(&rules);
+	ft_usleep(2000);
+	ft_kill_philosophers(&rules);
 	return 0;
 }

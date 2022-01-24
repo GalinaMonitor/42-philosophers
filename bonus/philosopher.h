@@ -5,6 +5,8 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <sys/time.h>
+#include <sys/types.h>
+#include <signal.h>
 # include "../libft/libft/libft.h"
 
 # define FORK 0

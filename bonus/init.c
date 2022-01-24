@@ -39,6 +39,10 @@ void	init_rules(t_rules *rules, char **argv, int argc)
 
 void	init_sem(t_rules *rules)
 {
+	sem_unlink("fork_sem");
+	sem_unlink("write_sem");
+	sem_unlink("stop");
+	sem_unlink("eat_enough");
 	rules->fork_sem = sem_open("fork_sem", O_CREAT | O_EXCL, S_IRWXU, rules->philo_num);
 	rules->write_sem = sem_open("write_sem", O_CREAT | O_EXCL, S_IRWXU, 1);
 	rules->stop = sem_open("stop", O_CREAT | O_EXCL, S_IRWXU, 0);
