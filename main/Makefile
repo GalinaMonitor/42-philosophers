@@ -8,13 +8,13 @@ LIBFT = ../libft/libft/libft.a
 
 HEADER = ./philosopher.h
 
-PHILO_SRC = philosopher.c init.c destroy.c actions.c service.c
+PHILO_SRC = philosopher.c init.c destroy.c actions.c service1.c service2.c
 
 SOURCES_LIBFT = $(addprefix $(DIR_LIBFT), $(LIBFT))
 
 all: $(NAME)
 
-$(NAME): $(LIBFT) $(PHILO_SRC)
+$(NAME): $(LIBFT) $(PHILO_SRC) $(HEADER)
 	@$(CC) $(FLAGS) -pthread $(PHILO_SRC) $(LIBFT) -o $(NAME) -g
 	@echo "PHILO is ready to use"
 

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gmonitor <gmonitor@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/25 19:00:01 by gmonitor          #+#    #+#             */
+/*   Updated: 2022/01/25 19:00:23 by gmonitor         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philosopher.h"
 
 void	init_philo(t_philo *philo, t_rules *rules)
@@ -25,7 +37,6 @@ void	init_rules(t_rules *rules, char **argv, int argc)
 {
 	if (argc < 2)
 		return ;
-
 	rules->philo_num = ft_atoi(argv[1]);
 	rules->death_time = ft_atoi(argv[2]);
 	rules->eating_time = ft_atoi(argv[3]);
@@ -42,7 +53,7 @@ void	init_rules(t_rules *rules, char **argv, int argc)
 
 void	init_mutex(t_rules *rules)
 {
-	int count;
+	int				count;
 	pthread_mutex_t	*mutex;
 
 	mutex = malloc(sizeof(pthread_mutex_t) * rules->philo_num);
@@ -73,7 +84,7 @@ void	init_pthread(t_rules *rules)
 
 void	init_philos(t_rules *rules)
 {
-	int count;
+	int	count;
 
 	count = 0;
 	while (count < rules->philo_num)
